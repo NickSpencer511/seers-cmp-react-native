@@ -5,13 +5,19 @@
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/seersco/seers-cmp-react-native"
+    "url": "https://github.com/NickSpencer511/seers-cmp-react-native"
   },
-  "keywords": ["seers", "cmp", "consent", "gdpr", "react-native"],
+  "keywords": [
+    "seers",
+    "cmp",
+    "consent",
+    "gdpr",
+    "react-native"
+  ],
   "author": "Seers AI",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": ">=0.60.0",
-    "@react-native-async-storage/async-storage": ">=1.0.0"
+    "@react-native-async-storage/async-storage": ">=1.0.0",
+    "react-native": ">=0.60.0"
   }
 }
