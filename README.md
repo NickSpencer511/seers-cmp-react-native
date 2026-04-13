@@ -1,13 +1,13 @@
-# @seers/react-native-cmp
+# @seersco/react-native-cmp
 
 Seers Consent Management Platform SDK for React Native.
 
 ## Installation
 
 ```bash
-npm install @seers/react-native-cmp
+npm install @seersco/react-native-cmp
 # or
-yarn add @seers/react-native-cmp
+yarn add @seersco/react-native-cmp
 ```
 
 Also install peer dependency:
@@ -18,7 +18,7 @@ npm install @react-native-async-storage/async-storage
 ## Usage
 
 ```js
-import SeersCMP from '@seers/react-native-cmp';
+import SeersCMP from '@seersco/react-native-cmp';
 
 // In App.js or index.js
 SeersCMP.initialize({ settingsId: 'YOUR_SETTINGS_ID' });
