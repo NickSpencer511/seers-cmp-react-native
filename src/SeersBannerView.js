@@ -258,7 +258,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
     <View style={[styles.sheetShadow, { backgroundColor: bgColor, padding: 12, paddingBottom: 10, ...containerRadius() }]}>
       <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }}>{bodyText}</Text>
       <View style={{ height: 7 }} />
-      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
+      <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
       <View style={{ height: 5 }} />
       {allowReject && (
         <>
@@ -266,7 +266,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
           <View style={{ height: 5 }} />
         </>
       )}
-      <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
+      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
       {poweredBy && (
         <Text style={{ fontSize: fs * 0.7, color: '#aaaaaa', textAlign: 'center', marginTop: 3 }}>
           Powered by Seers
@@ -319,7 +319,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
       <View style={{ height: 4 }} />
       <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }}>{bodyText}</Text>
       <View style={{ height: 8 }} />
-      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
+      <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
       <View style={{ height: 5 }} />
       {allowReject && (
         <>
@@ -327,7 +327,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
           <View style={{ height: 5 }} />
         </>
       )}
-      <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
+      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
     </View>
   );
 
