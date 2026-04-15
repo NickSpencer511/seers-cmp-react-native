@@ -41,6 +41,13 @@ import SeersCMP from './index';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// Scale factor: maps Vue's 190px preview frame to real screen width.
+// e.g. 360dp phone → scale=1.89, 414dp phone → scale=2.0 (capped)
+const PREVIEW_WIDTH = 190;
+const scale = Math.min(SCREEN_WIDTH / PREVIEW_WIDTH, 2.0);
+const sp  = (px) => Math.round(px * scale); // font sizes
+const dp  = (px) => Math.round(px * scale); // paddings / spacing
+
 // ─────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────
@@ -75,8 +82,8 @@ export default function SeersBannerView({ payload, onDismiss }) {
   const prefBorder   = bodyColor;
 
   // ── Font size ──
-  const fs      = parseFloat(b?.font_size) || 14;
-  const titleFs = fs + 2;
+  const fs      = sp(parseFloat(b?.font_size) || 14);
+  const titleFs = fs + sp(2);
 
   // ── Button type ──
   const btnType   = b?.button_type ?? 'default';
@@ -145,17 +152,15 @@ export default function SeersBannerView({ payload, onDismiss }) {
     </TouchableOpacity>
   );
 
-  // stk-dark: #1a1a2e bg
   const StkDark = ({ label, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.stkBtn, { backgroundColor: declineColor, borderRadius: btnRadius }]}
+      style={[styles.stkBtn, { backgroundColor: declineColor, borderRadius: btnRadius, marginBottom: dp(5) }]}
     >
       <Text style={[styles.stkBtnText, { fontSize: fs, color: declineText }]}>{label}</Text>
     </TouchableOpacity>
   );
 
-  // stk-primary: agree colour, stroke support
   const StkPrimary = ({ label, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
@@ -163,6 +168,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
         backgroundColor: isStroke ? 'transparent' : agreeColor,
         borderWidth: isStroke ? 1 : 0, borderColor: agreeColor,
         borderRadius: btnRadius,
+        marginBottom: dp(5),
       }]}
     >
       <Text style={[styles.stkBtnText, { fontSize: fs, color: isStroke ? agreeColor : agreeText }]}>
@@ -171,34 +177,32 @@ export default function SeersBannerView({ payload, onDismiss }) {
     </TouchableOpacity>
   );
 
-  // btn-item (bottom_sheet row, flex:1)
   const BtnItem = ({ label, bg, fg, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
-      style={{ flex: 1, backgroundColor: bg, borderRadius: btnRadius, padding: 4, alignItems: 'center' }}
+      style={{ flex: 1, backgroundColor: bg, borderRadius: btnRadius, padding: dp(4), alignItems: 'center' }}
     >
       <Text style={{ fontSize: fs, color: fg, fontWeight: '600' }} numberOfLines={1}>{label}</Text>
     </TouchableOpacity>
   );
 
-  // btn-pref-full: transparent bg, 1px border, body_text_color
   const PrefFullBtn = ({ label, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.stkBtn, {
+      style={{
         borderWidth: 1, borderColor: prefBorder, borderRadius: btnRadius,
-        paddingVertical: 4, paddingHorizontal: 6,
-      }]}
+        paddingVertical: dp(4), paddingHorizontal: dp(6), marginBottom: dp(3),
+        width: '100%', alignItems: 'center', backgroundColor: 'transparent',
+      }}
     >
       <Text style={{ fontSize: fs, color: prefBorder, fontWeight: '600', textAlign: 'center' }}>{label}</Text>
     </TouchableOpacity>
   );
 
-  // pref action buttons (allow/disable/save)
-  const PrefActionBtn = ({ label, bg, fg, onPress }) => (
+  const PrefActionBtn = ({ label, bg, fg, onPress, isSave = false }) => (
     <TouchableOpacity
       onPress={onPress}
-      style={{ backgroundColor: bg, borderRadius: 4, paddingVertical: 5, paddingHorizontal: 6, width: '100%' }}
+      style={{ backgroundColor: bg, borderRadius: dp(4), paddingVertical: isSave ? dp(5) : dp(4), paddingHorizontal: dp(6), width: '100%' }}
     >
       <Text style={{ fontSize: fs, color: fg, fontWeight: '700', textAlign: 'center' }}>{label}</Text>
     </TouchableOpacity>
@@ -230,19 +234,19 @@ export default function SeersBannerView({ payload, onDismiss }) {
           }}
         >
           {/* Arrow — rotates 90° when open */}
-          <Text style={{ fontSize: fs * 0.6, color: agreeColor, transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}>▶</Text>
-          <Text style={{ flex: 1, marginLeft: 3, fontSize: fs * 0.85, fontWeight: '600', color: bodyColor }}>
+          <Text style={{ fontSize: fs * 0.75, color: agreeColor, transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}>▶</Text>
+          <Text style={{ flex: 1, marginLeft: dp(3), fontSize: fs + sp(1), fontWeight: '600', color: bodyColor }}>
             {cat.label}
           </Text>
           {isNec ? (
-            <Text style={{ fontSize: fs * 0.75, fontWeight: '600', color: agreeColor }}>{alwaysActive}</Text>
+            <Text style={{ fontSize: fs, fontWeight: '600', color: agreeColor }}>{alwaysActive}</Text>
           ) : (
             <Toggle value={togOn} onToggle={() => setToggles(t => ({ ...t, [cat.key]: !t[cat.key] }))} />
           )}
         </TouchableOpacity>
         {isOpen && (
           <View style={styles.catBody}>
-            <Text style={{ fontSize: fs * 0.7, color: bodyColor, opacity: 0.8, lineHeight: fs * 1.05 }}>
+            <Text style={{ fontSize: fs - sp(1), color: bodyColor, opacity: 0.8, lineHeight: (fs - sp(1)) * 1.5 }}>
               {cat.desc}
             </Text>
           </View>
@@ -255,20 +259,19 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // POPUP — .consent-popup
   // ─────────────────────────────────────────────────────────
   const Popup = () => (
-    <View style={[styles.sheetShadow, { backgroundColor: bgColor, padding: 12, paddingBottom: 10, ...containerRadius() }]}>
+    <View style={[styles.sheetShadow, { backgroundColor: bgColor, padding: dp(12), ...containerRadius() }]}>
       <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }}>{bodyText}</Text>
-      <View style={{ height: 7 }} />
+      <View style={{ height: dp(7) }} />
       <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
-      <View style={{ height: 5 }} />
       {allowReject && (
         <>
           <StkDark label={btnDecline} onPress={() => save('disagree', false, false, false)} />
-          <View style={{ height: 5 }} />
+          <View style={{ height: dp(5) }} />
         </>
       )}
-      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
+      <StkOutline label={btnPref} onPress={() => setShowPref(true)} />
       {poweredBy && (
-        <Text style={{ fontSize: fs * 0.7, color: '#aaaaaa', textAlign: 'center', marginTop: 3 }}>
+        <Text style={{ fontSize: fs * 0.7, color: '#aaaaaa', textAlign: 'center', marginTop: dp(3) }}>
           Powered by Seers
         </Text>
       )}
@@ -279,29 +282,22 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // BOTTOM SHEET — .consent-sheet
   // ─────────────────────────────────────────────────────────
   const BottomSheet = () => (
-    <View style={[styles.sheetShadowLight, { backgroundColor: bgColor, padding: 10, paddingBottom: 8, ...containerRadius() }]}>
-      {showHandle && (
-        <View style={styles.handle} />
-      )}
-      <Text style={{ fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }}>
-        {titleText}
-      </Text>
-      <View style={{ height: 4 }} />
+    <View style={[styles.sheetShadowLight, { backgroundColor: bgColor, padding: dp(12), ...containerRadius() }]}>
+      {showHandle && <View style={styles.handle} />}
+      <Text style={{ fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }}>{titleText}</Text>
+      <View style={{ height: dp(4) }} />
       <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }}>{bodyText}</Text>
-      <View style={{ height: 7 }} />
-      {/* btn-row-primary: flex row, gap 4 */}
-      <View style={{ flexDirection: 'row', gap: 4 }}>
+      <View style={{ height: dp(7) }} />
+      <View style={{ flexDirection: 'row', gap: dp(4) }}>
         {allowReject && (
-          <BtnItem label={btnDecline} bg={declineColor} fg={declineText}
-            onPress={() => save('disagree', false, false, false)} />
+          <BtnItem label={btnDecline} bg={declineColor} fg={declineText} onPress={() => save('disagree', false, false, false)} />
         )}
-        <BtnItem label={btnAgree} bg={agreeColor} fg={agreeText}
-          onPress={() => save('agree', true, true, true)} />
+        <BtnItem label={btnAgree} bg={agreeColor} fg={agreeText} onPress={() => save('agree', true, true, true)} />
       </View>
-      <View style={{ height: 4 }} />
+      <View style={{ height: dp(4) }} />
       <PrefFullBtn label={btnPref} onPress={() => setShowPref(true)} />
       {poweredBy && (
-        <Text style={{ fontSize: fs * 0.7, color: '#aaaaaa', textAlign: 'center', marginTop: 3 }}>
+        <Text style={{ fontSize: fs * 0.7, color: '#aaaaaa', textAlign: 'center', marginTop: dp(3) }}>
           Powered by Seers
         </Text>
       )}
@@ -312,22 +308,19 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // DIALOG — .consent-modal (centred)
   // ─────────────────────────────────────────────────────────
   const DialogBanner = () => (
-    <View style={[styles.dialogShadow, { backgroundColor: bgColor, width: SCREEN_WIDTH * 0.88, padding: 12, ...containerRadius() }]}>
-      <Text style={{ fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }}>
-        {titleText}
-      </Text>
-      <View style={{ height: 4 }} />
+    <View style={[styles.dialogShadow, { backgroundColor: bgColor, width: SCREEN_WIDTH * 0.88, padding: dp(12), ...containerRadius() }]}>
+      <Text style={{ fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }}>{titleText}</Text>
+      <View style={{ height: dp(4) }} />
       <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }}>{bodyText}</Text>
-      <View style={{ height: 8 }} />
+      <View style={{ height: dp(8) }} />
       <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
-      <View style={{ height: 5 }} />
       {allowReject && (
         <>
           <StkDark label={btnDecline} onPress={() => save('disagree', false, false, false)} />
-          <View style={{ height: 5 }} />
+          <View style={{ height: dp(5) }} />
         </>
       )}
-      <StkOutline  label={btnPref}     onPress={() => setShowPref(true)} />
+      <StkOutline label={btnPref} onPress={() => setShowPref(true)} />
     </View>
   );
 
@@ -336,45 +329,38 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // ─────────────────────────────────────────────────────────
   const PrefPanel = () => (
     <View style={[styles.prefPanel, { backgroundColor: bgColor }]}>
-      <ScrollView contentContainerStyle={{ padding: 10, paddingTop: 8, paddingBottom: 6 }}>
-        {/* Close ✕ */}
-        <TouchableOpacity onPress={onDismiss} style={{ alignSelf: 'flex-end', marginBottom: 2 }}>
+      <ScrollView contentContainerStyle={{ padding: dp(12), paddingBottom: dp(20) }}>
+        <TouchableOpacity onPress={onDismiss} style={{ alignSelf: 'flex-end', marginBottom: dp(2) }}>
           <Text style={{ fontSize: fs, color: titleColor, fontWeight: '700' }}>✕</Text>
         </TouchableOpacity>
-        {/* Title */}
         <Text style={{ fontSize: titleFs, fontWeight: '700', color: titleColor, lineHeight: titleFs * 1.3 }}>
           {aboutCookies}
         </Text>
-        <View style={{ height: 4 }} />
-        {/* Body */}
-        <Text style={{ fontSize: fs - 1, color: bodyColor, opacity: 0.85, lineHeight: (fs - 1) * 1.4 }}>
+        <View style={{ height: dp(4) }} />
+        <Text style={{ fontSize: fs, color: bodyColor, opacity: 0.85, lineHeight: fs * 1.4 }}>
           {bodyText}
         </Text>
-        <View style={{ height: 4 }} />
-        {/* Policy link */}
-        <Text style={{ fontSize: fs - 2, fontWeight: '600', color: agreeColor, textDecorationLine: 'underline' }}>
+        <View style={{ height: dp(4) }} />
+        <Text style={{ fontSize: fs, fontWeight: '600', color: agreeColor, textDecorationLine: 'underline' }}>
           Read Cookie Policy ↗
         </Text>
-        <View style={{ height: 6 }} />
-        {/* Allow All */}
+        <View style={{ height: dp(6) }} />
         <PrefActionBtn label={btnAgree} bg={agreeColor} fg={agreeText}
           onPress={() => save('agree', true, true, true)} />
-        <View style={{ height: 4 }} />
-        {/* Disable All */}
+        <View style={{ height: dp(4) }} />
         <PrefActionBtn label={btnDecline} bg='#1a1a2e' fg='#ffffff'
           onPress={() => save('disagree', false, false, false)} />
-        <View style={{ height: 8 }} />
-        {/* Category list with top border */}
-        <View style={{ borderTopWidth: 1, borderTopColor: '#e0e0e0', paddingTop: 4 }}>
+        <View style={{ height: dp(8) }} />
+        <View style={{ borderTopWidth: 1, borderTopColor: '#e0e0e0', paddingTop: dp(4) }}>
           {cats.map(cat => <CatRow key={cat.key} cat={cat} />)}
         </View>
       </ScrollView>
-      {/* Sticky footer */}
       <View style={[styles.prefFooter, { backgroundColor: bgColor }]}>
         <PrefActionBtn
           label={btnSave}
           bg={agreeColor}
           fg={agreeText}
+          isSave={true}
           onPress={() => save('custom', toggles.preferences, toggles.statistics, toggles.marketing)}
         />
       </View>
@@ -449,10 +435,10 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 12,
   },
-  // stk-btn base: padding 5px 8px, full width, font-weight:700
+  // stk-btn: padding 5px 8px, margin-bottom 5px, font-weight:700, line-height:1.4
   stkBtn: {
-    paddingVertical: 5,
-    paddingHorizontal: 8,
+    paddingVertical: dp(5),
+    paddingHorizontal: dp(8),
     alignItems: 'center',
     width: '100%',
     backgroundColor: 'transparent',
@@ -460,65 +446,61 @@ const styles = StyleSheet.create({
   stkBtnText: {
     fontWeight: '700',
     textAlign: 'center',
-    lineHeight: undefined,
   },
   // pref-toggle: 36×20, border-radius:12
   toggleTrack: {
-    width: 36,
-    height: 20,
-    borderRadius: 12,
-    padding: 2,
+    width: dp(36),
+    height: dp(20),
+    borderRadius: dp(12),
+    padding: dp(2),
   },
   toggleThumb: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: dp(16),
+    height: dp(16),
+    borderRadius: dp(8),
     backgroundColor: '#ffffff',
   },
-  // sheet-handle: 32×4, #ccc, border-radius:2
   handle: {
-    width: 32,
-    height: 4,
+    width: dp(32),
+    height: dp(4),
     backgroundColor: '#cccccc',
-    borderRadius: 2,
+    borderRadius: dp(2),
     alignSelf: 'center',
-    marginBottom: 6,
+    marginBottom: dp(6),
   },
-  // pref-cat-wrap: 1px #e0e0e0 border, border-radius:5
   catWrap: {
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    borderRadius: 5,
-    marginBottom: 3,
+    borderRadius: dp(5),
+    marginBottom: dp(3),
     overflow: 'hidden',
   },
   catRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 5,
-    paddingVertical: 4,
+    paddingHorizontal: dp(5),
+    paddingVertical: dp(4),
   },
   catBody: {
-    paddingHorizontal: 7,
-    paddingTop: 3,
-    paddingBottom: 4,
+    paddingHorizontal: dp(7),
+    paddingTop: dp(3),
+    paddingBottom: dp(4),
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
     backgroundColor: 'rgba(0,0,0,0.02)',
   },
   prefPanel: {
     height: SCREEN_HEIGHT * 0.88,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: dp(16),
+    borderTopRightRadius: dp(16),
     overflow: 'hidden',
     width: '100%',
   },
   prefFooter: {
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
-    paddingHorizontal: 10,
-    paddingTop: 6,
-    paddingBottom: 8,
+    padding: dp(12),
+    paddingBottom: dp(24),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
