@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CDN_BASE = 'https://cdn.consents.dev';
+const CDN_BASE = 'https://cdn.seersco.com';
 const CAT_MAP  = { 3: 'statistics', 4: 'marketing', 5: 'preferences', 6: 'unclassified' };
 
 // ─────────────────────────────────────────────────────────────
@@ -279,6 +279,7 @@ const SEERS_ALLOWED_HOSTS = [
   'seers.ai',
   'seersco.com',
   'cdn.consents.dev',
+  'cdn.seersco.com',
 ];
 
 function _isAllowedHost(urlString) {
