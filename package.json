@@ -1,6 +1,6 @@
 {
   "name": "@seersco/react-native-cmp",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Seers Consent Management Platform SDK for React Native",
   "main": "src/index.js",
   "repository": {
