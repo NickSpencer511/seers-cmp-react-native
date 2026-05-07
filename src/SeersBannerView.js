@@ -38,12 +38,13 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  Platform,
 } from 'react-native';
 import SeersCMP from './index';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Keep CSS-like spacing from the Vue mobile preview on real devices.
+// Respect dashboard font_size exactly. The visual preview may scale separately.
 const scale = 1;
 const sp  = (px) => Math.round(px * scale); // font sizes
 const dp  = (px) => Math.round(px * scale); // paddings / spacing
@@ -115,14 +116,16 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // ── Font size ──
   const fs      = sp(Math.min(Math.max(parseFloat(b?.font_size) || 12, 10), 16));
   const titleFs = fs + sp(2);
-  const prefFs = Math.max(fs, sp(12));
+  const prefFs = fs;
   const prefTitleFs = prefFs + sp(2);
   const prefCatNameFs = prefFs + sp(1);
   const prefCatBodyFs = prefFs - sp(1);
-  const prefArrowFs = Math.max(prefFs * 0.75, sp(9));
+  const prefArrowFs = prefFs * 0.75;
   const selectedFont = (b?.font_style ?? '').trim().toLowerCase();
   const fontFamily = selectedFont && !['none', 'inherit'].includes(selectedFont)
-    ? selectedFont
+    ? (['arial', 'inter', 'spezia', 'sans-serif'].includes(selectedFont)
+        ? (Platform.OS === 'android' ? 'sans-serif' : 'Arial')
+        : selectedFont)
     : undefined;
   const fontStyle = fontFamily ? { fontFamily } : null;
 
@@ -239,7 +242,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
       accessibilityRole="button"
       style={[styles.stkBtn, { borderWidth: 1.5, borderColor: prefBorder, borderRadius: btnRadius }]}
     >
-      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: prefBorder }]}>{label}</Text>
+      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: prefBorder, lineHeight: fs * 1.35 }]}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -251,7 +254,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
       accessibilityRole="button"
       style={[styles.stkBtn, { backgroundColor: declineColor, borderRadius: btnRadius, marginBottom: dp(5) }]}
     >
-      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: declineText }]}>{label}</Text>
+      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: declineText, lineHeight: fs * 1.35 }]}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -268,7 +271,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
         marginBottom: dp(5),
       }]}
     >
-      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: isStroke ? agreeColor : agreeText }]}>
+      <Text style={[styles.stkBtnText, fontStyle, { fontSize: fs, color: isStroke ? agreeColor : agreeText, lineHeight: fs * 1.35 }]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -279,9 +282,9 @@ export default function SeersBannerView({ payload, onDismiss }) {
       onPress={onPress}
       accessibilityLabel={label}
       accessibilityRole="button"
-      style={{ flex: 1, backgroundColor: bg, borderRadius: btnRadius, padding: dp(4), alignItems: 'center' }}
+      style={{ flex: 1, backgroundColor: bg, borderRadius: btnRadius, minHeight: dp(32), paddingVertical: dp(5), paddingHorizontal: dp(8), alignItems: 'center', justifyContent: 'center' }}
     >
-      <Text style={[fontStyle, { fontSize: fs, color: fg, fontWeight: '600' }]} numberOfLines={1}>{label}</Text>
+      <Text style={[fontStyle, { fontSize: fs, color: fg, fontWeight: '600', lineHeight: fs * 1.35 }]} numberOfLines={1}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -293,11 +296,11 @@ export default function SeersBannerView({ payload, onDismiss }) {
       accessibilityRole="button"
       style={{
         borderWidth: 1, borderColor: prefBorder, borderRadius: btnRadius,
-        paddingVertical: dp(4), paddingHorizontal: dp(6), marginBottom: dp(3),
-        width: '100%', alignItems: 'center', backgroundColor: 'transparent',
+        minHeight: dp(32), paddingVertical: dp(5), paddingHorizontal: dp(8), marginBottom: dp(3),
+        width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent',
       }}
     >
-      <Text style={[fontStyle, { fontSize: fs, color: prefBorder, fontWeight: '600', textAlign: 'center' }]}>{label}</Text>
+      <Text style={[fontStyle, { fontSize: fs, color: prefBorder, fontWeight: '600', textAlign: 'center', lineHeight: fs * 1.35 }]}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -306,9 +309,9 @@ export default function SeersBannerView({ payload, onDismiss }) {
       onPress={onPress}
       accessibilityLabel={label}
       accessibilityRole="button"
-      style={{ backgroundColor: bg, borderRadius: dp(4), paddingVertical: isSave ? dp(5) : dp(4), paddingHorizontal: dp(6), width: '100%' }}
+      style={{ backgroundColor: bg, borderRadius: dp(4), minHeight: dp(isSave ? 38 : 36), paddingVertical: dp(7), paddingHorizontal: dp(10), width: '100%', alignItems: 'center', justifyContent: 'center' }}
     >
-      <Text style={[fontStyle, { fontSize: isSave ? prefFs : prefFs, color: fg, fontWeight: '700', textAlign: 'center' }]}>{label}</Text>
+      <Text style={[fontStyle, { fontSize: prefFs, color: fg, fontWeight: '700', textAlign: 'center', lineHeight: prefFs * 1.35 }]}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -359,7 +362,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
         </TouchableOpacity>
         {isOpen && (
           <View style={styles.catBody}>
-            <Text style={[fontStyle, { fontSize: prefCatBodyFs, color: bodyColor, opacity: 0.8, lineHeight: prefCatBodyFs * 1.5 }]}>
+            <Text style={[fontStyle, { fontSize: prefCatBodyFs, color: bodyColor, opacity: 0.8, lineHeight: prefCatBodyFs * 1.42 }]}>
               {cat.desc}
             </Text>
             {/* Cookie Details link — same as default.js seers-cmp-cookie-policy-detail-btn */}
@@ -405,7 +408,7 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // ─────────────────────────────────────────────────────────
   const Popup = () => (
     <View style={[styles.sheetShadow, { backgroundColor: bgColor, padding: dp(12), ...popupRadius }]}>
-      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }]}>{bodyText}</Text>
+      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.42 }]}>{bodyText}</Text>
       <View style={{ height: dp(7) }} />
       <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
       {allowReject && (
@@ -429,9 +432,9 @@ export default function SeersBannerView({ payload, onDismiss }) {
   const BottomSheet = () => (
     <View style={[styles.sheetShadowLight, { backgroundColor: bgColor, padding: dp(12), ...sheetRadius() }]}>
       {showHandle && <View style={styles.handle} />}
-      <Text style={[fontStyle, { fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }]}>{titleText}</Text>
+      <Text style={[fontStyle, { fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.32 }]}>{titleText}</Text>
       <View style={{ height: dp(4) }} />
-      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }]}>{bodyText}</Text>
+      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.42 }]}>{bodyText}</Text>
       <View style={{ height: dp(7) }} />
       <View style={{ flexDirection: 'row', gap: dp(4) }}>
         {allowReject && (
@@ -454,9 +457,9 @@ export default function SeersBannerView({ payload, onDismiss }) {
   // ─────────────────────────────────────────────────────────
   const DialogBanner = () => (
     <View style={[styles.dialogShadow, { backgroundColor: bgColor, width: SCREEN_WIDTH * 0.88, padding: dp(12), ...dialogRadius() }]}>
-      <Text style={[fontStyle, { fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.3 }]}>{titleText}</Text>
+      <Text style={[fontStyle, { fontSize: titleFs, color: titleColor, fontWeight: '700', lineHeight: titleFs * 1.32 }]}>{titleText}</Text>
       <View style={{ height: dp(4) }} />
-      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.5 }]}>{bodyText}</Text>
+      <Text style={[fontStyle, { fontSize: fs, color: bodyColor, opacity: 0.9, lineHeight: fs * 1.42 }]}>{bodyText}</Text>
       <View style={{ height: dp(8) }} />
       <StkPrimary label={btnAgree} onPress={() => save('agree', true, true, true)} />
       {allowReject && (
@@ -486,11 +489,11 @@ export default function SeersBannerView({ payload, onDismiss }) {
             <Text style={[fontStyle, { fontSize: prefFs, color: titleColor, fontWeight: '700' }]}>✕</Text>
           </TouchableOpacity>
         </View>
-        <Text style={[fontStyle, { fontSize: prefTitleFs, fontWeight: '700', color: titleColor, lineHeight: prefTitleFs * 1.3 }]}>
+        <Text style={[fontStyle, { fontSize: prefTitleFs, fontWeight: '700', color: titleColor, lineHeight: prefTitleFs * 1.32 }]}>
           {aboutCookies}
         </Text>
         <View style={{ height: dp(4) }} />
-        <Text style={[fontStyle, { fontSize: prefFs, color: bodyColor, opacity: 0.85, lineHeight: prefFs * 1.45 }]}>
+        <Text style={[fontStyle, { fontSize: prefFs, color: bodyColor, opacity: 0.85, lineHeight: prefFs * 1.42 }]}>
           {bodyText}
         </Text>
         <View style={{ height: dp(4) }} />
@@ -694,9 +697,11 @@ const styles = StyleSheet.create({
   },
   // stk-btn: padding 5px 8px, margin-bottom 5px, font-weight:700, line-height:1.4
   stkBtn: {
+    minHeight: dp(32),
     paddingVertical: dp(5),
     paddingHorizontal: dp(8),
     alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
     backgroundColor: 'transparent',
   },
@@ -735,7 +740,7 @@ const styles = StyleSheet.create({
   catRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: dp(38),
+    minHeight: dp(40),
     paddingHorizontal: dp(10),
     paddingVertical: dp(8),
   },
